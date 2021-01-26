@@ -1,16 +1,49 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
    
-### Simulator.
-You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2).  
 
-To run the simulator on Mac/Linux, first make the binary file executable with the following command:
-```shell
-sudo chmod u+x {simulator_file_name}
 ```
+## In this project the goal is to design path planner to navigate around the virtual highway with other traffic car objects. The detailed information of the pipeline is presented below. 
 
-### Goals
-In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
+## Details
+The project includes a car traveling with traffic objects on a 3-lane highway. There are some restrictions on the maneuvers of the car;
+* maximum speed
+* maximum shock
+* maximum acceleration
+* collision avoidance
+
+The car must decide its trajectory and speed during movement. In the `main.cpp` code, the trajectory of the vehicle is decided. In the output, the path planner generates (x, y) points that the car will visit every 0.02 seconds.
+
+The steps to find these (x, y) points are as follows:
+#### Get ego vehicle location from main car localization data:
+
+Initially, the car is started in lane 1, that is, in the center lane and at 0.0 speed. Then, with the lane width information, from the frenet coordinates (s,d) the lane of the car is found by the `car_lane ()` function. This lane information allows us to decide the location of other traffic vehicles relative to our lane.
+
+#### Get traffic vehicle information from sensor fusion data:
+
+Sensor fuson data provides a lot of information about the other cars. The location of the other cars with respect to the ego vehicle must be found so that the next maneuver of the ego vehicle can be decided. The same `car_lane ()` function is used to find the lane of the traffic objects. Then, the other vehicles are checked to see if the ego is on the right or left of the vehicle or in the same lane. Three flags(traffic_car_ahead, traffic_car_left, and traffic_car_right) are set according to this lane comparison and the relative distance.
+
+#### Make a decision :
+
+In the decision maker part, it checks for the traffic_car_ahead flag. If it is true that it is not empty, then it will make the decision to turn left, turn right, or reduce the speed, depending on the availability of other lane. 
+
+If the ahead of the vehicle is empty and velocity is not same as maximum velocity, then it will increase the speed by small difference.
+
+#### Find trajectory points
+
+ After decision, the last two points of the previous trajectory are used in conjunction with three points at a far distance (30, 60, 90 meters) according to the decided lane. The spline is calculated based on those points. The coordinates are transformed to local car coordinates.
+
+All criteria in this rubic point is met as follows:
+
+* The car drives within the speed limit
+* Max acceleration and jerk are not exceeded
+* No collisions
+* The car keeps the current lane till it finds an opportunity to make lane change and reach higher speed
+* The car is able to change lanes without exceeding max acceleration and jerk
+
+<p align="center">
+  <img width="800" height="400" src="./data/pp_carnd.png ">
+</p>
 
 #### The map of the highway is in data/highway_map.txt
 Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoint's map coordinate position, the s value is the distance along the road to get to that waypoint in meters, the dx and dy values define the unit normal vector pointing outward of the highway loop.
@@ -59,17 +92,7 @@ the path has processed since last time.
 
 ["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
 
-## Details
 
-1. The car uses a perfect controller and will visit every (x,y) point it recieves in the list every .02 seconds. The units for the (x,y) points are in meters and the spacing of the points determines the speed of the car. The vector going from a point to the next point in the list dictates the angle of the car. Acceleration both in the tangential and normal directions is measured along with the jerk, the rate of change of total Acceleration. The (x,y) point paths that the planner recieves should not have a total acceleration that goes over 10 m/s^2, also the jerk should not go over 50 m/s^3. (NOTE: As this is BETA, these requirements might change. Also currently jerk is over a .02 second interval, it would probably be better to average total acceleration over 1 second and measure jerk from that.
-
-2. There will be some latency between the simulator running and the path planner returning a path, with optimized code usually its not very long maybe just 1-3 time steps. During this delay the simulator will continue using points that it was last given, because of this its a good idea to store the last points you have used so you can have a smooth transition. previous_path_x, and previous_path_y can be helpful for this transition since they show the last points given to the simulator controller with the processed points already removed. You would either return a path that extends this previous path or make sure to create a new path that has a smooth transition with this last path.
-
-## Tips
-
-A really helpful resource for doing this project and creating smooth trajectories was using http://kluge.in-chemnitz.de/opensource/spline/, the spline function is in a single hearder file is really easy to use.
-
----
 
 ## Dependencies
 
@@ -91,55 +114,11 @@ A really helpful resource for doing this project and creating smooth trajectorie
     cd uWebSockets
     git checkout e94b6e1
     ```
+### Simulator.
+You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2).  
 
-## Editor Settings
+To run the simulator on Mac/Linux, first make the binary file executable with the following command:
+```shell
+sudo chmod u+x {simulator_file_name}
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
 
