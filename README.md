@@ -1,8 +1,6 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
    
-
-```
 ## In this project the goal is to design path planner to navigate around the virtual highway with other traffic car objects. The detailed information of the pipeline is presented below. 
 
 ## Details
@@ -15,21 +13,21 @@ The project includes a car traveling with traffic objects on a 3-lane highway. T
 The car must decide its trajectory and speed during movement. In the `main.cpp` code, the trajectory of the vehicle is decided. In the output, the path planner generates (x, y) points that the car will visit every 0.02 seconds.
 
 The steps to find these (x, y) points are as follows:
-#### Get ego vehicle location from main car localization data:
+### Get ego vehicle location from main car localization data:
 
 Initially, the car is started in lane 1, that is, in the center lane and at 0.0 speed. Then, with the lane width information, from the frenet coordinates (s,d) the lane of the car is found by the `car_lane ()` function. This lane information allows us to decide the location of other traffic vehicles relative to our lane.
 
-#### Get traffic vehicle information from sensor fusion data:
+### Get traffic vehicle information from sensor fusion data:
 
 Sensor fuson data provides a lot of information about the other cars. The location of the other cars with respect to the ego vehicle must be found so that the next maneuver of the ego vehicle can be decided. The same `car_lane ()` function is used to find the lane of the traffic objects. Then, the other vehicles are checked to see if the ego is on the right or left of the vehicle or in the same lane. Three flags(traffic_car_ahead, traffic_car_left, and traffic_car_right) are set according to this lane comparison and the relative distance.
 
-#### Make a decision :
+### Make a decision :
 
 In the decision maker part, it checks for the traffic_car_ahead flag. If it is true that it is not empty, then it will make the decision to turn left, turn right, or reduce the speed, depending on the availability of other lane. 
 
 If the ahead of the vehicle is empty and velocity is not same as maximum velocity, then it will increase the speed by small difference.
 
-#### Find trajectory points
+### Find trajectory points
 
  After decision, the last two points of the previous trajectory are used in conjunction with three points at a far distance (30, 60, 90 meters) according to the decided lane. The spline is calculated based on those points. The coordinates are transformed to local car coordinates.
 
